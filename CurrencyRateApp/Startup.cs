@@ -26,6 +26,7 @@ namespace CurrencyRateApp
         {
             services.AddHostedService<CurrencyService>();
             services.AddMemoryCache();
+            services.AddLogging();
             services.AddControllersWithViews();
         }
 

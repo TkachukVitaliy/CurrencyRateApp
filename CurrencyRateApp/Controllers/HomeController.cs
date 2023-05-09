@@ -15,14 +15,23 @@ namespace CurrencyRateApp.Controllers
     public class HomeController : Controller
     {
         private readonly IMemoryCache _memoryCache;
+        private readonly ILogger<HomeController> _logger;
         private readonly List<CurrencyConverter> currency = new List<CurrencyConverter>();
         CurrencyViewModel cvm = new CurrencyViewModel();
 
-        public HomeController(IMemoryCache memoryCache)
+        public HomeController(IMemoryCache memoryCache, ILogger<HomeController> logger)
         {
             _memoryCache = memoryCache;
-
-            currency = JsonConvert.DeserializeObject<List<CurrencyConverter>>((string)_memoryCache.Get("key_currency_json"));
+            _logger = logger;
+            try
+            {
+                currency = JsonConvert.DeserializeObject<List<CurrencyConverter>>((string)_memoryCache.Get("key_currency_json"));
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+            }
+            
 
         }
 
@@ -33,12 +42,12 @@ namespace CurrencyRateApp.Controllers
             return View(cvm);
         }
         [HttpPost]
-        public IActionResult Index(int amount, decimal currTo)
+        public JsonResult Index(int amount, decimal currTo)
         {
-            cvm.CurrencyList = currency;
 
-            ViewBag.Result = (amount / currTo).ToString("0.00");
-            return View("Index", cvm);
+            var result = (amount / currTo).ToString("0.00");
+
+            return Json(result);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
